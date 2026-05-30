@@ -1,3 +1,9 @@
+"""Short-lived visual effects drawn on top of gameplay.
+
+中文：管理漁網、浮動分數和金幣動畫；每個效果都有自己的壽命，結束後由 Game.update() 移除。
+English: Manages web, floating-score, and coin animations; each effect has a lifetime and is removed by Game.update() when finished.
+"""
+
 from __future__ import annotations
 
 import math
@@ -8,6 +14,12 @@ from assets import Assets
 
 
 class WebEffect:
+    """Expanding net shown when a bullet hits.
+
+    中文：依炮台 power 選擇不同漁網圖，並用縮放動畫讓命中更有回饋感。
+    English: Uses the cannon power to choose a net frame and scales it briefly to make hits feel responsive.
+    """
+
     __slots__ = ("x", "y", "power", "age", "duration")
 
     def __init__(self, x: float, y: float, power: int) -> None:
@@ -32,6 +44,12 @@ class WebEffect:
 
 
 class FloatingScore:
+    """Score text that floats upward after a capture.
+
+    中文：顯示本次捕獲獲得的分數，逐漸上升並淡出。
+    English: Displays the award from a capture, then moves upward and fades out.
+    """
+
     __slots__ = ("x", "y", "value", "age", "duration")
 
     def __init__(self, x: float, y: float, value: int) -> None:
@@ -60,6 +78,12 @@ class FloatingScore:
 
 
 class CoinEffect:
+    """Coin burst animation after a payout.
+
+    中文：較高獎勵使用 large 金幣動畫，讓大獎在畫面上更明顯。
+    English: Higher awards use the large coin animation so bigger payouts stand out visually.
+    """
+
     __slots__ = ("x", "y", "large", "age", "duration")
 
     def __init__(self, x: float, y: float, value: int) -> None:

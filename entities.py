@@ -1,3 +1,9 @@
+"""Core moving game entities.
+
+中文：定義魚、子彈和炮台的狀態、移動、動畫和繪製邏輯。
+English: Defines state, movement, animation, and drawing logic for fish, bullets, and the cannon.
+"""
+
 from __future__ import annotations
 
 import math
@@ -11,6 +17,12 @@ from config import CANNON_X, CANNON_Y, FPS, HEIGHT, WIDTH, FishSpec, fish_reward
 
 
 class Fish:
+    """One active or pooled fish object.
+
+    中文：魚會從物件池重複使用；reset() 套用魚種資料和初始位置，capture() 進入捕獲動畫。
+    English: Fish instances are reused from a pool; reset() applies fish data and spawn position, while capture() starts the capture animation.
+    """
+
     __slots__ = (
         "active",
         "spec",
@@ -82,12 +94,22 @@ class Fish:
         self.dy = math.sin(rad) * self.speed
 
     def maybe_turn(self) -> None:
+        """Occasionally choose a new heading while inside the play area.
+
+        中文：讓魚群路徑不要完全直線，畫面會比較自然。
+        English: Keeps fish movement from being perfectly straight so the scene feels more natural.
+        """
         if random.random() > 0.80:
             direction = 1 if random.random() > 0.5 else -1
             self.dest_angle = self.angle + random.randint(20, 30) * direction
         self.turn_timer = random.randint(FPS * 5, FPS * 10)
 
     def update(self) -> Optional[int]:
+        """Advance movement/animation and return a payout when capture finishes.
+
+        中文：一般狀態會移動和轉向；被捕獲後縮小播放動畫，結束時回傳獎金。
+        English: Normal fish move and turn; captured fish shrink through their animation and return the award when finished.
+        """
         if not self.active or self.spec is None:
             return None
 
@@ -160,6 +182,12 @@ class Fish:
 
 
 class Bullet:
+    """Projectile fired by the cannon.
+
+    中文：子彈只負責直線飛行和繪製，命中判定由 Game 搭配 FishManager 的格子查詢處理。
+    English: Bullets only handle straight movement and drawing; hit detection is handled by Game with FishManager's spatial grid.
+    """
+
     __slots__ = ("active", "x", "y", "dx", "dy", "angle", "power")
 
     def __init__(self) -> None:
@@ -196,6 +224,12 @@ class Bullet:
 
 
 class Cannon:
+    """Player cannon at the bottom of the screen.
+
+    中文：保存目前炮台等級、瞄準方向和開火動畫狀態。
+    English: Stores the current cannon level, aim direction, and firing animation state.
+    """
+
     def __init__(self) -> None:
         self.power = 1
         self.angle = 0.0

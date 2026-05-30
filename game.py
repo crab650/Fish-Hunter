@@ -1,3 +1,9 @@
+"""Main game loop and gameplay orchestration.
+
+中文：Game 負責把輸入、魚群、子彈、捕獲機率、帳務統計、特效和 UI 串起來。
+English: Game connects input, fish management, bullets, capture odds, accounting stats, effects, and UI into one loop.
+"""
+
 from __future__ import annotations
 
 import sys
@@ -28,6 +34,12 @@ from ui import draw_bottom_ui, draw_config_overlay
 
 
 class Game:
+    """Runtime state for one playable game session.
+
+    中文：這個 class 保存所有會隨時間變化的狀態，例如玩家代幣、炮台、魚、子彈、特效和機台帳務。
+    English: This class owns all state that changes over time, such as coins, cannon, fish, bullets, effects, and machine accounting.
+    """
+
     def __init__(self) -> None:
         pygame.init()
         pygame.display.set_caption("Fish Hunter Python")
@@ -67,6 +79,11 @@ class Game:
         self.running = True
 
     def run(self) -> None:
+        """Run the fixed-FPS event/update/draw loop.
+
+        中文：每幀依序處理輸入、更新遊戲狀態、重畫畫面，最後用 clock.tick() 控制 FPS。
+        English: Each frame handles input, updates state, redraws the screen, then uses clock.tick() to cap FPS.
+        """
         while self.running:
             self.handle_events()
             self.update()
@@ -75,6 +92,11 @@ class Game:
         pygame.quit()
 
     def handle_events(self) -> None:
+        """Handle keyboard and mouse input.
+
+        中文：F2 開啟設定畫面時會阻擋射擊，只允許帳務與吐分率設定操作。
+        English: When the F2 setup screen is open, shooting is blocked and only accounting/payout controls are accepted.
+        """
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.running = False
@@ -112,6 +134,11 @@ class Game:
                     self.try_fire(event.pos)
 
     def try_fire(self, target: Tuple[int, int]) -> None:
+        """Spend coins and fire one bullet toward the target.
+
+        中文：只有成功射出子彈才計入 wagered，這樣機台投入和玩家錢包會分開計算。
+        English: Wagered input is recorded only after a shot is fired, keeping machine input separate from the player's wallet.
+        """
         shot_cost = CANNON_COSTS[self.cannon.power - 1]
         if self.fire_cooldown > 0 or self.coins < shot_cost:
             return
@@ -129,6 +156,11 @@ class Game:
         self.fire_cooldown = 8
 
     def update(self) -> None:
+        """Advance gameplay when the setup screen is closed.
+
+        中文：更新魚、子彈、命中、捕獲、獎金入帳和特效生命週期。
+        English: Updates fish, bullets, hits, captures, paid awards, and effect lifetimes.
+        """
         if self.config_open:
             return
         if self.fire_cooldown > 0:
@@ -155,6 +187,11 @@ class Game:
         self.coin_effects = [coin for coin in self.coin_effects if not coin.done]
 
     def bullet_hit(self, bullet: Bullet, grid: Dict[Tuple[int, int], List[Fish]]) -> bool:
+        """Check whether a bullet touches any nearby fish.
+
+        中文：這裡只判斷子彈是否碰到魚；真正能不能捕獲由 release_web() 再問 PayoutController。
+        English: This only checks contact; release_web() asks PayoutController whether the hit becomes a capture.
+        """
         bullet_radius = 8 + bullet.power * 2
         for fish in self.fish_manager.nearby(bullet.x, bullet.y, grid):
             dist2 = (fish.x - bullet.x) ** 2 + (fish.y - bullet.y) ** 2
@@ -163,6 +200,11 @@ class Game:
         return False
 
     def release_web(self, bullet: Bullet, grid: Dict[Tuple[int, int], List[Fish]]) -> None:
+        """Create a net effect and attempt captures inside its radius.
+
+        中文：同一張網可以掃到多條附近的魚，但每條魚仍需通過吐分機率判定。
+        English: One net can cover multiple nearby fish, but every fish still must pass the payout probability check.
+        """
         self.webs.append(WebEffect(bullet.x, bullet.y, bullet.power))
         radius = 48 + bullet.power * 17
         for fish in self.fish_manager.nearby(bullet.x, bullet.y, grid):
@@ -179,11 +221,21 @@ class Game:
                 self.coin_effects.append(CoinEffect(fish.x, fish.y, score))
 
     def reset_machine_accounting(self) -> None:
+        """Clear current accounting and today's saved stats.
+
+        中文：給 F2 後台測試用，方便重新觀察吐分率和捕獲行為。
+        English: Used from the F2 setup screen to restart payout/accounting observation.
+        """
         self.payout.reset()
         self.captured = 0
         self.stats.reset_today()
 
     def adjust_payout_rate(self, direction: int) -> None:
+        """Move to the next configured target payout rate.
+
+        中文：吐分率只能在 config.py 的 PAYOUT_RATE_OPTIONS 裡切換，避免輸入任意值造成測試不穩。
+        English: Payout rate only moves through PAYOUT_RATE_OPTIONS in config.py to keep tuning controlled.
+        """
         current = min(
             range(len(PAYOUT_RATE_OPTIONS)),
             key=lambda index: abs(PAYOUT_RATE_OPTIONS[index] - self.payout.target_rate),
@@ -192,6 +244,11 @@ class Game:
         self.payout.target_rate = PAYOUT_RATE_OPTIONS[next_index]
 
     def draw(self) -> None:
+        """Draw the full frame in back-to-front order.
+
+        中文：先背景和魚，再子彈/特效/UI/炮台；設定畫面最後畫，才能覆蓋遊戲畫面。
+        English: Draws background/fish first, then bullets/effects/UI/cannon; setup overlay draws last so it covers gameplay.
+        """
         self.screen.blit(self.assets.background, (0, 0))
         self.fish_manager.draw(self.screen, self.assets, self.rotations)
         for bullet in self.bullets:

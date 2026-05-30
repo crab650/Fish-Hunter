@@ -1,3 +1,9 @@
+"""Shared configuration and gameplay tuning tables.
+
+中文：集中管理畫面尺寸、機台吐分率、炮台成本、魚種倍率和 sprite 切割資訊，方便之後調整玩法。
+English: Centralizes screen size, payout-rate options, cannon costs, fish rewards, and sprite slicing data for easier gameplay tuning.
+"""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -29,6 +35,11 @@ REWARD_SCALE = 5
 
 
 def fish_reward(base_coin: int) -> int:
+    """Convert a fish's base coin value into the actual payout.
+
+    中文：高價魚使用更高倍率，讓大魚和鯊魚有明顯獎勵差距；REWARD_SCALE 可全域放大或縮小獎金。
+    English: High-value fish use larger multipliers so big fish and sharks feel distinct; REWARD_SCALE adjusts all awards globally.
+    """
     if base_coin >= 100:
         return base_coin * 8 * REWARD_SCALE
     if base_coin >= 50:
@@ -42,6 +53,12 @@ def fish_reward(base_coin: int) -> int:
 
 @dataclass(frozen=True)
 class FishSpec:
+    """Static data for one fish type.
+
+    中文：包含素材檔名、每格尺寸、動畫幀數、基礎獎勵、基礎捕獲率、群組大小和移動速度。
+    English: Holds asset name, frame size, animation counts, base reward, base capture rate, group size, and movement speed.
+    """
+
     name: str
     file: str
     frame_w: int
@@ -74,6 +91,12 @@ FISH_SPECS: Tuple[FishSpec, ...] = (
 
 @dataclass(frozen=True)
 class CannonSpec:
+    """Static data for one cannon level.
+
+    中文：不同炮台等級對應不同圖片、動畫幀數和 power 值。
+    English: Each cannon level maps to its image, animation frame count, and power value.
+    """
+
     file: str
     frame_w: int
     frame_h: int

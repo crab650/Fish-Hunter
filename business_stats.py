@@ -1,3 +1,9 @@
+"""Five-day machine business statistics storage.
+
+中文：用 JSON 保存最近五天的投幣、子彈投入、吐分和捕獲數，供 F2 設定畫面顯示。
+English: Stores the latest five days of inserted coins, wagered shots, payouts, and captures for the F2 setup screen.
+"""
+
 from __future__ import annotations
 
 import json
@@ -7,6 +13,12 @@ from typing import Dict, List, Tuple
 
 
 class BusinessStats:
+    """Small JSON-backed daily counter store.
+
+    中文：資料量很小，所以直接讀寫整個 JSON 檔；每次更新後都保存，避免遊戲關閉時遺失帳務。
+    English: The data is tiny, so the whole JSON file is read/written directly; every update is saved to avoid losing accounting data.
+    """
+
     def __init__(self, path: Path) -> None:
         self.path = path
         self.days: Dict[str, Dict[str, int]] = {}
@@ -18,6 +30,11 @@ class BusinessStats:
         return date.today().isoformat()
 
     def ensure_today(self) -> Dict[str, int]:
+        """Return today's row, creating it when needed.
+
+        中文：所有統計欄位都用 0 起始，讓 UI 可以安全讀取。
+        English: Initializes every counter to 0 so the UI can read fields safely.
+        """
         day = self.days.setdefault(
             self.today_key,
             {"inserted": 0, "wagered": 0, "paid": 0, "captures": 0},
@@ -49,6 +66,11 @@ class BusinessStats:
         self.path.write_text(json.dumps(self.days, indent=2), encoding="utf-8")
 
     def trim(self) -> None:
+        """Keep only the newest five dates.
+
+        中文：F2 畫面只顯示五天資料，舊資料會被移除以保持檔案簡單。
+        English: The F2 screen only displays five days, so older rows are removed to keep the file simple.
+        """
         keys = sorted(self.days.keys())
         for key in keys[:-5]:
             del self.days[key]

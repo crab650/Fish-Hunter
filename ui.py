@@ -1,3 +1,9 @@
+"""User-interface drawing helpers.
+
+中文：負責底部炮台資訊列、代幣數字，以及 F2 機台設定/帳務畫面。
+English: Draws the bottom cannon HUD, coin digits, and the F2 machine setup/accounting overlay.
+"""
+
 from __future__ import annotations
 
 import pygame
@@ -14,6 +20,11 @@ from config import (
 
 
 def draw_bottom_ui(game: object) -> None:
+    """Draw the bottom HUD during normal gameplay.
+
+    中文：包含代幣、炮台等級、發射成本、加減按鈕和捕獲數。
+    English: Shows coins, cannon level, shot cost, plus/minus buttons, and capture count.
+    """
     bottom = game.assets.bottom.subsurface((0, 0, 765, 72)).copy()
     game.screen.blit(bottom, (BOTTOM_X, BOTTOM_Y))
     mouse_down = pygame.mouse.get_pressed()[0]
@@ -35,12 +46,22 @@ def draw_bottom_ui(game: object) -> None:
 
 
 def draw_coin_digits(game: object, x: int, y: int) -> None:
+    """Draw wallet coins with the original number sprite sheet.
+
+    中文：固定顯示六位數，超過時取最後六位，維持底部 UI 寬度穩定。
+    English: Always draws six digits and keeps the last six when larger, preserving the bottom UI width.
+    """
     text = f"{game.coins:06d}"[-6:]
     for index, digit in enumerate(text):
         game.screen.blit(game.assets.num_digits[digit], (x + index * 23, y))
 
 
 def draw_config_overlay(game: object) -> None:
+    """Draw the BIOS-style machine setup screen.
+
+    中文：這個畫面顯示目標吐分率、目前機台帳務、玩家狀態和最近五天營業資料。
+    English: This overlay shows target payout rate, current machine accounting, player state, and five-day business records.
+    """
     panel = pygame.Rect(26, 22, WIDTH - 52, HEIGHT - 44)
     pygame.draw.rect(game.screen, (0, 0, 120), panel)
     pygame.draw.rect(game.screen, (112, 214, 255), panel, width=3)
