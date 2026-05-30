@@ -81,7 +81,7 @@ def draw_config_overlay(game: object) -> None:
     for text, color in lines:
         if text:
             game.screen.blit(game.bios_font.render(text, True, color), (x, y))
-        y += 22
+        y += 20
 
     table_x = panel.x + 510
     table_y = panel.y + 64
@@ -98,7 +98,7 @@ def draw_config_overlay(game: object) -> None:
         hold = wagered - paid
         row = f"{day[-5:]} {inserted:5d} {wagered:5d} {paid:5d} {captures:4d} {hold:5d}"
         game.screen.blit(game.bios_small_font.render(row, True, (255, 255, 255)), (table_x, table_y))
-        table_y += 22
+        table_y += 20
 
     help_lines = [
         "F2 / ESC：回到遊戲",
@@ -109,4 +109,4 @@ def draw_config_overlay(game: object) -> None:
     help_y = panel.bottom - 88
     for item in help_lines:
         game.screen.blit(game.bios_small_font.render(item, True, (255, 255, 80)), (x, help_y))
-        help_y += 20
+        help_y += 18
